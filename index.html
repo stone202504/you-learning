@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>除法竖式动画推理</title>
+<style>
+  body { font-family: 'PingFang SC', sans-serif; background-color: #f4f7f6; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  h1 { color: #2c3e50; }
+  .container { display: flex; gap: 40px; margin-top: 20px; }
+  .board { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+  .division-box { display: inline-block; font-size: 24px; font-family: monospace; text-align: left; margin-top: 20px; position: relative; }
+  .step-text { margin-top: 20px; font-size: 16px; color: #e74c3c; min-height: 60px; font-weight: bold; }
+  button { margin-top: 20px; padding: 10px 20px; font-size: 16px; background: #3498db; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+  button:hover { background: #2980b9; }
+  .hidden { opacity: 0; transition: opacity 0.5s; }
+  .visible { opacity: 1; transition: opacity 0.5s; }
+  .highlight { color: #e74c3c; font-weight: bold; }
+</style>
+</head>
+<body>
+  <h1>数学题动画演示 ❤️</h1>
+  <div class="container">
+    <!-- 第一题 -->
+    <div class="board">
+      <h3>1. 635 ÷ □，商中间有 0</h3>
+      <div class="division-box" id="div1">
+        <div id="q1" class="hidden">&nbsp;&nbsp;1 <span class="highlight">0</span> 5</div>
+        <div style="border-bottom: 2px solid #333; margin-bottom: 2px;">&nbsp;&nbsp;—————</div>
+        <div><span id="d1" class="highlight">?</span> ) 6 3 5</div>
+        <div id="s1-1" class="hidden">&nbsp;&nbsp;&nbsp;6</div>
+        <div id="s1-2" class="hidden">&nbsp;&nbsp;&nbsp;——</div>
+        <div id="s1-3" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">3</span></div>
+        <div id="s1-4" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0</div>
+        <div id="s1-5" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+        <div id="s1-6" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3 5</div>
+      </div>
+      <div class="step-text" id="text1">点击下方按钮开始推导</div>
+      <button onclick="nextStep1()">下一步</button>
+    </div>
+    <!-- 第二题 -->
+    <div class="board">
+      <h3>2. 366 ÷ □，商末尾有 0</h3>
+      <div class="division-box" id="div2">
+        <div id="q2" class="hidden">&nbsp;&nbsp;&nbsp;4 <span class="highlight">0</span></div>
+        <div style="border-bottom: 2px solid #333; margin-bottom: 2px;">&nbsp;&nbsp;—————</div>
+        <div><span id="d2" class="highlight">?</span> ) 3 6 6</div>
+        <div id="s2-1" class="hidden">&nbsp;&nbsp;&nbsp;3 6</div>
+        <div id="s2-2" class="hidden">&nbsp;&nbsp;&nbsp;——</div>
+        <div id="s2-3" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">6</span></div>
+      </div>
+      <div class="step-text" id="text2">点击下方按钮开始推导</div>
+      <button onclick="nextStep2()">下一步</button>
+    </div>
+  </div>
+  <script>
+    let step1 = 0;
+    function nextStep1() {
+      step1++;
+      const t = document.getElementById('text1');
+      if(step1 === 1) { t.innerHTML = "要想商中间有0，说明除到十位数字 3 时，不够除。"; document.getElementById('s1-3').classList.add('visible'); }
+      else if(step1 === 2) { t.innerHTML = "这意味着：被除数前一位的 6 必须<br><b>正好被除尽</b>（不能有余数），落下来的只有 3。"; document.getElementById('s1-1').classList.add('visible'); document.getElementById('s1-2').classList.add('visible'); }
+      else if(step1 === 3) { t.innerHTML = "正好除尽 6 的一位数有：1, 2, 3, 6。"; }
+      else if(step1 === 4) { t.innerHTML = "同时，落下来的 3 要不够除（3 < □）。<br>所以除数必须大于 3！"; }
+      else if(step1 === 5) { t.innerHTML = "在 1, 2, 3, 6 中，大于 3 的只有 <b>6</b>。<br>所以 □ = 6。"; document.getElementById('d1').innerText = "6"; document.getElementById('q1').classList.add('visible'); document.getElementById('s1-4').classList.add('visible'); document.getElementById('s1-5').classList.add('visible'); document.getElementById('s1-6').classList.add('visible'); }
+    }
+    let step2 = 0;
+    function nextStep2() {
+      step2++;
+      const t = document.getElementById('text2');
+      if(step2 === 1) { t.innerHTML = "要想商的末尾是 0，说明除到最后一位 6 时，不够除。"; document.getElementById('s2-3').classList.add('visible'); }
+      else if(step2 === 2) { t.innerHTML = "这意味着前面的 36 必须<b>正好被除尽</b>，<br>落下来的只有 6。"; document.getElementById('s2-1').classList.add('visible'); document.getElementById('s2-2').classList.add('visible'); }
+      else if(step2 === 3) { t.innerHTML = "同时，落下来的 6 要不够除（6 < □）。<br>所以除数必须大于 6！"; }
+      else if(step2 === 4) { t.innerHTML = "一位数中大于 6 的有：7, 8, 9。"; }
+      else if(step2 === 5) { t.innerHTML = "这三个数中，谁能正好整除 36 呢？<br>36 ÷ 7 (不行), 36 ÷ 8 (不行), 36 ÷ 9 = 4 (可以！)"; }
+      else if(step2 === 6) { t.innerHTML = "所以 □ = <b>9</b>。"; document.getElementById('d2').innerText = "9"; document.getElementById('q2').classList.add('visible'); }
+    }
+  </script>
+</body>
+</html>

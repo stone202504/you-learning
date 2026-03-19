@@ -5,76 +5,294 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>除法竖式动画推理</title>
 <style>
-  body { font-family: 'PingFang SC', sans-serif; background-color: #f4f7f6; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-  h1 { color: #2c3e50; }
-  .container { display: flex; gap: 40px; margin-top: 20px; }
-  .board { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 300px; text-align: center; }
-  .division-box { display: inline-block; font-size: 24px; font-family: monospace; text-align: left; margin-top: 20px; position: relative; }
-  .step-text { margin-top: 20px; font-size: 16px; color: #e74c3c; min-height: 60px; font-weight: bold; }
-  button { margin-top: 20px; padding: 10px 20px; font-size: 16px; background: #3498db; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
-  button:hover { background: #2980b9; }
-  .hidden { opacity: 0; transition: opacity 0.5s; }
-  .visible { opacity: 1; transition: opacity 0.5s; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 30px 20px; }
+  h1 { color: #fff; text-align: center; font-size: 28px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+  .subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 14px; margin-bottom: 24px; }
+  .section-title { color: #fff; text-align: center; font-size: 20px; margin: 30px 0 16px; text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .container { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .board {
+    background: #fff;
+    padding: 24px 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    width: 340px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .board:hover { transform: translateY(-2px); }
+  .board h3 { color: #2c3e50; font-size: 16px; margin-bottom: 12px; }
+  .division-box {
+    display: inline-block;
+    font-size: 22px;
+    font-family: 'Courier New', monospace;
+    text-align: left;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+  .step-text {
+    margin-top: 16px;
+    font-size: 15px;
+    color: #e74c3c;
+    min-height: 65px;
+    font-weight: bold;
+    line-height: 1.6;
+    text-align: left;
+    padding: 0 8px;
+  }
+  button {
+    margin-top: 14px;
+    padding: 10px 28px;
+    font-size: 15px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+  button:hover { background: linear-gradient(135deg, #2980b9, #1a6fa0); transform: scale(1.03); }
+  button:disabled { background: #bdc3c7; cursor: default; transform: none; }
+  .hidden { opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.5s, max-height 0.5s; }
+  .visible { opacity: 1; max-height: 40px; transition: opacity 0.5s, max-height 0.5s; }
   .highlight { color: #e74c3c; font-weight: bold; }
+  .box { display: inline-block; width: 26px; height: 26px; border: 2px solid #e74c3c; border-radius: 4px; text-align: center; line-height: 26px; font-weight: bold; color: #e74c3c; margin: 0 1px; vertical-align: middle; font-size: 20px; }
+  .box.revealed { background: #ffeaea; border-color: #27ae60; color: #27ae60; animation: pop 0.3s ease; }
+  @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  .divider { width: 100%; height: 2px; background: #333; margin: 2px 0; }
+  .nav { text-align: center; margin-bottom: 20px; }
+  .nav a { color: rgba(255,255,255,0.9); margin: 0 12px; text-decoration: none; font-size: 14px; padding: 6px 14px; border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; transition: all 0.2s; }
+  .nav a:hover, .nav a.active { background: rgba(255,255,255,0.2); border-color: #fff; }
+  @media (max-width: 750px) { .container { flex-direction: column; align-items: center; } .board { width: 95%; max-width: 400px; } }
 </style>
 </head>
 <body>
-  <h1>数学题动画演示 ❤️</h1>
-  <div class="container">
-    <!-- 第一题 -->
-    <div class="board">
-      <h3>1. 635 ÷ □，商中间有 0</h3>
-      <div class="division-box" id="div1">
-        <div id="q1" class="hidden">&nbsp;&nbsp;1 <span class="highlight">0</span> 5</div>
-        <div style="border-bottom: 2px solid #333; margin-bottom: 2px;">&nbsp;&nbsp;—————</div>
-        <div><span id="d1" class="highlight">?</span> ) 6 3 5</div>
-        <div id="s1-1" class="hidden">&nbsp;&nbsp;&nbsp;6</div>
-        <div id="s1-2" class="hidden">&nbsp;&nbsp;&nbsp;——</div>
-        <div id="s1-3" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">3</span></div>
-        <div id="s1-4" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0</div>
-        <div id="s1-5" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;——</div>
-        <div id="s1-6" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3 5</div>
-      </div>
-      <div class="step-text" id="text1">点击下方按钮开始推导</div>
-      <button onclick="nextStep1()">下一步</button>
+
+<h1>数学除法竖式 - 动画推理 ❤️</h1>
+<p class="subtitle">点击"下一步"，跟着动画一步步理解解题思路</p>
+
+<div class="nav">
+  <a href="#part1" class="active">基础题</a>
+  <a href="#part2">附加题 (+5分)</a>
+</div>
+
+<!-- ==================== 基础题 ==================== -->
+<div class="section-title" id="part1">--- 基础题 ---</div>
+<div class="container">
+  <!-- 第一题：635 ÷ □ 商中间有0 -->
+  <div class="board">
+    <h3>1. 635 ÷ □，商中间有 0</h3>
+    <div class="division-box">
+      <div id="q1" class="hidden">&nbsp;&nbsp;&nbsp;1 <span class="highlight">0</span> 5</div>
+      <div class="divider"></div>
+      <div><span id="d1" class="box">?</span> ) 6 3 5</div>
+      <div id="s1-1" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;6</div>
+      <div id="s1-2" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s1-3" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">3</span></div>
+      <div id="s1-4" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0</div>
+      <div id="s1-5" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s1-6" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3 5</div>
+      <div id="s1-7" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3 5</div>
+      <div id="s1-8" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s1-9" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0</div>
     </div>
-    <!-- 第二题 -->
-    <div class="board">
-      <h3>2. 366 ÷ □，商末尾有 0</h3>
-      <div class="division-box" id="div2">
-        <div id="q2" class="hidden">&nbsp;&nbsp;&nbsp;4 <span class="highlight">0</span></div>
-        <div style="border-bottom: 2px solid #333; margin-bottom: 2px;">&nbsp;&nbsp;—————</div>
-        <div><span id="d2" class="highlight">?</span> ) 3 6 6</div>
-        <div id="s2-1" class="hidden">&nbsp;&nbsp;&nbsp;3 6</div>
-        <div id="s2-2" class="hidden">&nbsp;&nbsp;&nbsp;——</div>
-        <div id="s2-3" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">6</span></div>
-      </div>
-      <div class="step-text" id="text2">点击下方按钮开始推导</div>
-      <button onclick="nextStep2()">下一步</button>
-    </div>
+    <div class="step-text" id="text1">点击下方按钮开始推导</div>
+    <button onclick="nextStep1()" id="btn1">下一步</button>
   </div>
-  <script>
-    let step1 = 0;
-    function nextStep1() {
-      step1++;
-      const t = document.getElementById('text1');
-      if(step1 === 1) { t.innerHTML = "要想商中间有0，说明除到十位数字 3 时，不够除。"; document.getElementById('s1-3').classList.add('visible'); }
-      else if(step1 === 2) { t.innerHTML = "这意味着：被除数前一位的 6 必须<br><b>正好被除尽</b>（不能有余数），落下来的只有 3。"; document.getElementById('s1-1').classList.add('visible'); document.getElementById('s1-2').classList.add('visible'); }
-      else if(step1 === 3) { t.innerHTML = "正好除尽 6 的一位数有：1, 2, 3, 6。"; }
-      else if(step1 === 4) { t.innerHTML = "同时，落下来的 3 要不够除（3 < □）。<br>所以除数必须大于 3！"; }
-      else if(step1 === 5) { t.innerHTML = "在 1, 2, 3, 6 中，大于 3 的只有 <b>6</b>。<br>所以 □ = 6。"; document.getElementById('d1').innerText = "6"; document.getElementById('q1').classList.add('visible'); document.getElementById('s1-4').classList.add('visible'); document.getElementById('s1-5').classList.add('visible'); document.getElementById('s1-6').classList.add('visible'); }
-    }
-    let step2 = 0;
-    function nextStep2() {
-      step2++;
-      const t = document.getElementById('text2');
-      if(step2 === 1) { t.innerHTML = "要想商的末尾是 0，说明除到最后一位 6 时，不够除。"; document.getElementById('s2-3').classList.add('visible'); }
-      else if(step2 === 2) { t.innerHTML = "这意味着前面的 36 必须<b>正好被除尽</b>，<br>落下来的只有 6。"; document.getElementById('s2-1').classList.add('visible'); document.getElementById('s2-2').classList.add('visible'); }
-      else if(step2 === 3) { t.innerHTML = "同时，落下来的 6 要不够除（6 < □）。<br>所以除数必须大于 6！"; }
-      else if(step2 === 4) { t.innerHTML = "一位数中大于 6 的有：7, 8, 9。"; }
-      else if(step2 === 5) { t.innerHTML = "这三个数中，谁能正好整除 36 呢？<br>36 ÷ 7 (不行), 36 ÷ 8 (不行), 36 ÷ 9 = 4 (可以！)"; }
-      else if(step2 === 6) { t.innerHTML = "所以 □ = <b>9</b>。"; document.getElementById('d2').innerText = "9"; document.getElementById('q2').classList.add('visible'); }
-    }
-  </script>
+
+  <!-- 第二题：366 ÷ □ 商末尾有0 -->
+  <div class="board">
+    <h3>2. 366 ÷ □，商末尾有 0</h3>
+    <div class="division-box">
+      <div id="q2" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;4 <span class="highlight">0</span></div>
+      <div class="divider"></div>
+      <div><span id="d2" class="box">?</span> ) 3 6 6</div>
+      <div id="s2-1" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;3 6</div>
+      <div id="s2-2" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s2-3" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">6</span></div>
+    </div>
+    <div class="step-text" id="text2">点击下方按钮开始推导</div>
+    <button onclick="nextStep2()" id="btn2">下一步</button>
+  </div>
+</div>
+
+<!-- ==================== 附加题 ==================== -->
+<div class="section-title" id="part2">--- 附加题（选做，另加 5 分）---</div>
+<p class="subtitle">在 □ 里填上合适的数</p>
+<div class="container">
+  <!-- 第三题：□□□ ÷ 7 = 125 -->
+  <div class="board">
+    <h3>3. □□□ ÷ 7 = □□□（三位数除以7）</h3>
+    <div class="division-box">
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span id="q3-1" class="box">?</span> <span id="q3-2" class="box">?</span> <span id="q3-3" class="box">?</span></div>
+      <div class="divider"></div>
+      <div>&nbsp;7 ) <span id="d3-1" class="box">?</span> <span id="d3-2" class="box">?</span> <span id="d3-3" class="box">?</span></div>
+      <div id="s3-1" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">7</span></div>
+      <div id="s3-2" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s3-3" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">1 7</span></div>
+      <div id="s3-4" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">1 4</span></div>
+      <div id="s3-5" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s3-6" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">3 5</span></div>
+      <div id="s3-7" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">3 5</span></div>
+      <div id="s3-8" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s3-9" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">0</span></div>
+    </div>
+    <div class="step-text" id="text3">点击下方按钮开始推导</div>
+    <button onclick="nextStep3()" id="btn3">下一步</button>
+  </div>
+
+  <!-- 第四题：□□□□ ÷ 9 = 505 -->
+  <div class="board">
+    <h3>4. □□□□ ÷ 9 = □□□（商中间有0）</h3>
+    <div class="division-box">
+      <div>&nbsp;&nbsp;&nbsp;<span id="q4-1" class="box">?</span> <span id="q4-2" class="box">?</span> <span id="q4-3" class="box">?</span></div>
+      <div class="divider"></div>
+      <div>&nbsp;9 ) <span id="d4-1" class="box">?</span> <span id="d4-2" class="box">?</span> <span id="d4-3" class="box">?</span> <span id="d4-4" class="box">?</span></div>
+      <div id="s4-1" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">4 5</span></div>
+      <div id="s4-2" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s4-3" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">0 4</span></div>
+      <div id="s4-4" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">0</span></div>
+      <div id="s4-5" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s4-6" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">4 5</span></div>
+      <div id="s4-7" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">4 5</span></div>
+      <div id="s4-8" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;——</div>
+      <div id="s4-9" class="hidden">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">0</span></div>
+    </div>
+    <div class="step-text" id="text4">点击下方按钮开始推导</div>
+    <button onclick="nextStep4()" id="btn4">下一步</button>
+  </div>
+</div>
+
+<script>
+/* ========== 第1题：635 ÷ ? = 105 ========== */
+let step1 = 0;
+function nextStep1() {
+  step1++;
+  const t = document.getElementById('text1');
+  switch(step1) {
+    case 1: t.innerHTML = "要想商中间有0，说明除到十位数字 3 时，不够除。"; show('s1-3'); break;
+    case 2: t.innerHTML = "这意味着：被除数百位的 6 必须<b>正好被除尽</b>（余数为0），落下来的只有 3。"; show('s1-1'); show('s1-2'); break;
+    case 3: t.innerHTML = "正好除尽 6 的一位数有：1, 2, 3, 6。"; break;
+    case 4: t.innerHTML = "同时，落下来的 3 要不够除（3 &lt; □）。<br>所以除数必须 <b>大于 3</b>！"; break;
+    case 5:
+      t.innerHTML = "在 1, 2, 3, 6 中，大于 3 的只有 <b>6</b>。<br>所以 □ = <b>6</b>，验证：635 ÷ 6 = 105 …… 5？";
+      break;
+    case 6:
+      t.innerHTML = "等等！635 ÷ 6 = 105 余 5，不能整除。<br>但题目只要求商中间有0，余数没关系！<br>答案：<b>□ = 6</b>";
+      revealBox('d1', '6');
+      show('q1'); show('s1-4'); show('s1-5'); show('s1-6'); show('s1-7'); show('s1-8'); show('s1-9');
+      document.getElementById('btn1').disabled = true;
+      break;
+  }
+}
+
+/* ========== 第2题：366 ÷ ? ，商末尾有0 ========== */
+let step2 = 0;
+function nextStep2() {
+  step2++;
+  const t = document.getElementById('text2');
+  switch(step2) {
+    case 1: t.innerHTML = "要想商末尾是 0，说明除到个位数字 6 时，不够除。"; show('s2-3'); break;
+    case 2: t.innerHTML = "这意味着前面的 36 必须<b>正好被除尽</b>，<br>落下来的只有 6。"; show('s2-1'); show('s2-2'); break;
+    case 3: t.innerHTML = "同时，落下来的 6 要不够除（6 &lt; □）。<br>所以除数必须 <b>大于 6</b>！"; break;
+    case 4: t.innerHTML = "一位数中大于 6 的有：<b>7, 8, 9</b>。"; break;
+    case 5: t.innerHTML = "谁能正好整除 36 呢？<br>36÷7 ✗ &nbsp; 36÷8 ✗ &nbsp; 36÷9=4 ✓"; break;
+    case 6:
+      t.innerHTML = "所以 □ = <b>9</b>。<br>验证：366 ÷ 9 = 40 …… 6 ✓（商末尾有0）";
+      revealBox('d2', '9'); show('q2');
+      document.getElementById('btn2').disabled = true;
+      break;
+  }
+}
+
+/* ========== 第3题：??? ÷ 7 = ??? ========== */
+let step3 = 0;
+function nextStep3() {
+  step3++;
+  const t = document.getElementById('text3');
+  switch(step3) {
+    case 1:
+      t.innerHTML = "观察竖式结构：第一步减出的数只有一位 <b>7</b>，<br>说明 7 × 商的百位 = 7，所以商的百位 = <b>1</b>。";
+      show('s3-1'); show('s3-2');
+      revealBox('q3-1', '1');
+      break;
+    case 2:
+      t.innerHTML = "被除数的百位被 7 除商 1，7×1=7。<br>所以被除数的百位 = <b>8</b>（因为余数1，落下一位得17）。";
+      revealBox('d3-1', '8');
+      show('s3-3');
+      break;
+    case 3:
+      t.innerHTML = "落下来得到 <b>17</b>，17 ÷ 7 = <b>2</b> 余 3。<br>所以商的十位 = <b>2</b>，7×2 = 14。";
+      revealBox('q3-2', '2');
+      show('s3-4'); show('s3-5');
+      break;
+    case 4:
+      t.innerHTML = "17 - 14 = 3，说明被除数十位是 <b>7</b>（和百位余1拼成17）。";
+      revealBox('d3-2', '7');
+      break;
+    case 5:
+      t.innerHTML = "余数 3 落下个位，得到 <b>35</b>。<br>35 ÷ 7 = <b>5</b>，整除！商的个位 = <b>5</b>。";
+      show('s3-6'); show('s3-7'); show('s3-8'); show('s3-9');
+      revealBox('q3-3', '5');
+      break;
+    case 6:
+      t.innerHTML = "个位数字：35的个位是 <b>5</b>。<br>所以被除数 = <b>875</b>，商 = <b>125</b>。<br>验证：875 ÷ 7 = 125 ✓";
+      revealBox('d3-3', '5');
+      document.getElementById('btn3').disabled = true;
+      break;
+  }
+}
+
+/* ========== 第4题：???? ÷ 9 = ??? (商中间有0) ========== */
+let step4 = 0;
+function nextStep4() {
+  step4++;
+  const t = document.getElementById('text4');
+  switch(step4) {
+    case 1:
+      t.innerHTML = "先看竖式：9 除四位数，商是三位数。<br>第一步 9 × ? = <b>45</b>，所以商的百位 = <b>5</b>。";
+      show('s4-1'); show('s4-2');
+      revealBox('q4-1', '5');
+      break;
+    case 2:
+      t.innerHTML = "9 × 5 = 45，被除数前两位就是 <b>45</b>。";
+      revealBox('d4-1', '4'); revealBox('d4-2', '5');
+      break;
+    case 3:
+      t.innerHTML = "45 - 45 = 0，落下第三位数字，得到的数 <b>不够9除</b>！<br>所以商的十位 = <b>0</b>（商中间有0）。";
+      show('s4-3'); show('s4-4'); show('s4-5');
+      revealBox('q4-2', '0');
+      break;
+    case 4:
+      t.innerHTML = "落下来的数不够除，说明被除数第三位 <b>小于 9</b>。<br>继续落下第四位，得到两位数，再除以 9。";
+      break;
+    case 5:
+      t.innerHTML = "9 × ? = <b>45</b>（最后一步），所以商的个位 = <b>5</b>。<br>落下来的两位数 = 45。";
+      show('s4-6'); show('s4-7'); show('s4-8'); show('s4-9');
+      revealBox('q4-3', '5');
+      break;
+    case 6:
+      t.innerHTML = "落下来的两位数是 45，前面余 0，<br>所以第三位 = <b>4</b>，第四位 = <b>5</b>。<br>被除数 = <b>4545</b>。";
+      revealBox('d4-3', '4'); revealBox('d4-4', '5');
+      break;
+    case 7:
+      t.innerHTML = "最终答案：<b>4545 ÷ 9 = 505</b> ✓<br>商中间确实有 0！";
+      document.getElementById('btn4').disabled = true;
+      break;
+  }
+}
+
+/* ========== 工具函数 ========== */
+function show(id) {
+  document.getElementById(id).classList.remove('hidden');
+  document.getElementById(id).classList.add('visible');
+}
+function revealBox(id, val) {
+  const el = document.getElementById(id);
+  el.innerText = val;
+  el.classList.add('revealed');
+}
+</script>
 </body>
 </html>
